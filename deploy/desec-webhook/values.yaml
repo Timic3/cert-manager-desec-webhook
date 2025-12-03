@@ -1,19 +1,25 @@
-affinity: {}
+# The GroupName here is used to identify your company or business unit that
+# created this webhook.
+# For example, this may be "acme.mycompany.example".
+# This name will need to be referenced in each Issuer's `webhook` stanza to
+# inform cert-manager of where to send ChallengePayload resources in order to
+# solve the DNS01 challenge.
+# This group name should be **unique**, hence using your own company's domain
+# here is recommended.
+groupName: acme.company.example
+
 certManager:
   namespace: cert-manager
   serviceAccountName: cert-manager
 
-nameOverride: ""
-fullnameOverride: ""
-
-groupName: de.su541.acme
 image:
-  repository: "ghcr.io/su541/cert-manager-desec-webhook"
-  tag: latest
+  repository: "ghcr.io/Timic3/cert-manager-desec-webhook"
   pullPolicy: IfNotPresent
 
-secretName:
-  - desec-io-token
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
 
 service:
   port: 443
@@ -34,3 +40,5 @@ resources: {}
 nodeSelector: {}
 
 tolerations: []
+
+affinity: {}
