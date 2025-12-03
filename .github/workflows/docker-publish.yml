@@ -67,16 +67,16 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Set latest tag for master branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Git tag (semver)
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             # Short commit SHA
             type=sha,prefix=,format=short
             # Long commit SHA
             type=sha,prefix=,format=long
+            # Set latest tag for master branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            # Git tag (semver)
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
