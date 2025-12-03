@@ -12,6 +12,10 @@ certManager:
   namespace: cert-manager
   serviceAccountName: cert-manager
 
+# Secrets listed here will be able to be accessed by cert-manager ServiceAccount
+secretNames:
+  - desec-io-token
+
 image:
   repository: "ghcr.io/Timic3/cert-manager-desec-webhook"
   pullPolicy: IfNotPresent
