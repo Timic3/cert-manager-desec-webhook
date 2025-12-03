@@ -17,7 +17,7 @@ secretNames:
   - desec-io-token
 
 image:
-  repository: "ghcr.io/Timic3/cert-manager-desec-webhook"
+  repository: ghcr.io/timic3/cert-manager-desec-webhook
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
