@@ -17,8 +17,12 @@ RUN CGO_ENABLED=0 go build -o webhook -ldflags '-w -extldflags "-static"' .
 
 FROM alpine:3.18
 
-RUN apk add --no-cache ca-certificates
+RUN apk add --no-cache ca-certificates && \
+    addgroup -g 1000 appgroup && \
+    adduser -D -u 1000 -G appgroup appuser
 
-COPY --from=build /workspace/webhook /usr/local/bin/webhook
+COPY --from=build --chown=appuser:appgroup /workspace/webhook /usr/local/bin/webhook
+
+USER appuser
 
 ENTRYPOINT ["webhook"]

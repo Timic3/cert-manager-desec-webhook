@@ -27,6 +27,7 @@ fullnameOverride: ""
 
 service:
   port: 443
+  targetPort: 8443
   type: ClusterIP
 
 resources: {}
@@ -49,6 +50,8 @@ affinity: {}
 
 securityContext:
   runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
 
 containerSecurityContext:
   allowPrivilegeEscalation: false
