@@ -119,7 +119,7 @@ func loadConfig(cfgJSON *extapi.JSON) (desecDNSProviderConfig, error) {
 		return cfg, nil
 	}
 	if err := json.Unmarshal(cfgJSON.Raw, &cfg); err != nil {
-		return cfg, errors.New(fmt.Errorf("error decoding solver config: %v", err))
+		return cfg, fmt.Errorf("error decoding solver config: %v", err)
 	}
 
 	return cfg, nil
@@ -136,7 +136,7 @@ func (c *desecDNSProviderSolver) getDomain(client desec.Client, subname string) 
 			return &v, nil
 		}
 	}
-	return nil, errors.New(fmt.Errorf("domain not found"))
+	return nil, fmt.Errorf("domain not found")
 }
 
 func (c *desecDNSProviderSolver) getRecordInfo(api desec.Client, ch *v1alpha1.ChallengeRequest) (*desec.Domain, string, error) {
@@ -166,12 +166,12 @@ func (c *desecDNSProviderSolver) getSecretKey(secret v1.SecretKeySelector, names
 
 	sec, err := c.client.CoreV1().Secrets(namespace).Get(context.Background(), secret.Name, metav1.GetOptions{})
 	if err != nil {
-		return "", errors.new(fmt.Errorf("secret `%s/%s` not found", namespace, secret.Name))
+		return "", fmt.Errorf("secret `%s/%s` not found", namespace, secret.Name)
 	}
 
 	data, ok := sec.Data[secret.Key]
 	if !ok {
-		return "", errors.new(fmt.Errorf("key `%q` not found in secret `%s/%s`", secret.Key, namespace, secret.Name))
+		return "", fmt.Errorf("key `%q` not found in secret `%s/%s`", secret.Key, namespace, secret.Name)
 	}
 
 	return string(data), nil
