@@ -44,7 +44,8 @@ func (c *desecDNSProviderSolver) Name() string {
 }
 
 func (c *desecDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
-	klog.V(1).Infof("preset record '%s'", ch.ResolvedFQDN)
+	klog.InfoS("presenting challenge", "dnsName", ch.DNSName, "resolvedZone", ch.ResolvedZone, "resolvedFQDN", ch.ResolvedFQDN)
+
 	cfg, err := loadConfig(ch.Config)
 
 	klog.V(5).Info("retrieving secret")
@@ -52,7 +53,7 @@ func (c *desecDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	klog.V(5).Info("creating desec client")
 	api := c.getClient(apiToken)
 
-	klog.V(1).Infof("retrieving domain %s", util.UnFqdn(ch.ResolvedZone))
+	klog.V(5).Infof("retrieving domain %s", util.UnFqdn(ch.ResolvedZone))
 
 	domain, subName, err := c.getRecordInfo(api, ch)
 	if err != nil {
@@ -74,12 +75,13 @@ func (c *desecDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return err
 	}
 
-	klog.V(5).Infof("Record %s", record)
+	klog.InfoS("challenge presented", "dnsName", ch.DNSName, "resolvedZone", ch.ResolvedZone, "resolvedFQDN", ch.ResolvedFQDN)
+
 	return nil
 }
 
 func (c *desecDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
-	klog.V(1).Infof("cleanup record '%s'", ch.ResolvedFQDN)
+	klog.InfoS("cleaning challenge", "dnsName", ch.DNSName, "resolvedZone", ch.ResolvedZone, "resolvedFQDN", ch.ResolvedFQDN)
 	cfg, err := loadConfig(ch.Config)
 
 	apiToken, err := c.getSecretKey(cfg.APIKeySecretRef, ch.ResourceNamespace)
@@ -94,7 +96,9 @@ func (c *desecDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 	if recError != nil {
 		return recError
 	}
-	klog.V(1).Infof("Record %s in zone %s deleted", subName, domain.Name)
+
+	klog.InfoS("challenge cleanup complete", "dnsName", ch.DNSName, "resolvedZone", ch.ResolvedZone, "resolvedFQDN", ch.ResolvedFQDN)
+
 	return nil
 }
 
@@ -115,7 +119,7 @@ func loadConfig(cfgJSON *extapi.JSON) (desecDNSProviderConfig, error) {
 		return cfg, nil
 	}
 	if err := json.Unmarshal(cfgJSON.Raw, &cfg); err != nil {
-		return cfg, fmt.Errorf("error decoding solver config: %v", err)
+		return cfg, errors.New(fmt.Errorf("error decoding solver config: %v", err))
 	}
 
 	return cfg, nil
@@ -132,7 +136,7 @@ func (c *desecDNSProviderSolver) getDomain(client desec.Client, subname string) 
 			return &v, nil
 		}
 	}
-	return nil, fmt.Errorf("domain not found")
+	return nil, errors.New(fmt.Errorf("domain not found"))
 }
 
 func (c *desecDNSProviderSolver) getRecordInfo(api desec.Client, ch *v1alpha1.ChallengeRequest) (*desec.Domain, string, error) {
@@ -162,12 +166,12 @@ func (c *desecDNSProviderSolver) getSecretKey(secret v1.SecretKeySelector, names
 
 	sec, err := c.client.CoreV1().Secrets(namespace).Get(context.Background(), secret.Name, metav1.GetOptions{})
 	if err != nil {
-		return "", fmt.Errorf("secret `%s/%s` not found", namespace, secret.Name)
+		return "", errors.new(fmt.Errorf("secret `%s/%s` not found", namespace, secret.Name))
 	}
 
 	data, ok := sec.Data[secret.Key]
 	if !ok {
-		return "", fmt.Errorf("key `%q` not found in secret `%s/%s`", secret.Key, namespace, secret.Name)
+		return "", errors.new(fmt.Errorf("key `%q` not found in secret `%s/%s`", secret.Key, namespace, secret.Name))
 	}
 
 	return string(data), nil
