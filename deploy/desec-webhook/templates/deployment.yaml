@@ -21,6 +21,7 @@ spec:
         release: {{ .Release.Name }}
     spec:
       serviceAccountName: {{ include "desec-webhook.fullname" . }}
+      securityContext: {{ toYaml .Values.securityContext | nindent 8 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -55,6 +56,8 @@ spec:
               readOnly: true
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+          securityContext:
+{{ toYaml .Values.containerSecurityContext | nindent 12 }}
       volumes:
         - name: certs
           secret:
